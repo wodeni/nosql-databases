@@ -57,3 +57,9 @@ Part E
  u'item': u'Mac Pro',
  u'price': 1579}
 ```
+
+- NOTE: why did I use `$sum : 1`?
+    - According to the official doc
+    > When used in the $group stage, $sum has the following syntax and returns the collective sum of all the numeric values that result from applying a specified expression to each document in a group of documents that share the same group by key: { $sum: < expression > }
+
+    - Thus, I was trying to count the number of documents, which is similar to `$count`, but probably more efficient because we sum __after__ filtering.
