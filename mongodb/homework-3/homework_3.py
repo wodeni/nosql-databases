@@ -106,7 +106,8 @@ cursor = purchases.aggregate([
             'item': 1,
             'price': '$price_info.price'
         }
-    }
+    },
+    { '$unwind' : '$price' }
 ])
 
 for document in cursor:
