@@ -1,7 +1,106 @@
-// The scenario you have used for your schema is:
+// The scenario you have used for your schema is: House of Cards
 
+// Create characters
 
-// This is an example. Your own commands should *not* be commented out so we can pipe the file into the cypher-shell.
-// If you'd like to test your commands, you can run 'cat homework_4.txt | cypher-shell -u neo4j -p test' from
-// the vagrant box command line. Make sure neo4j is running first.
-// CREATE (a:person { name: 't' });
+CREATE (a:character { name: 'Frank Underwood', job:  'president', gender: 'male' });
+CREATE (a:character { name: 'Claire Underwood', job:  ['first lady', 'president'], gender: 'female' });
+CREATE (a:character { name: 'Zoe Barnes', job:  'journalist', gender: 'female' });
+CREATE (a:character { name: 'Edward Meechum', job:  'bodyguard', gender: 'male' });
+CREATE (a:character { name: 'Adam Galloway', job:  'photographer', gender: 'male' });
+CREATE (a:character { name: 'Raymond Tusk', job:  'entrepreneur', gender: 'male' });
+CREATE (a:character { name: 'Jackie Sharp', job:  'whip', gender: 'female' });
+CREATE (a:character { name: 'Remy Danton', job:  'lobbist', gender: 'male' });
+
+// Create relationships
+
+// 1
+MATCH (a:character), (b:character)
+WHERE a.name = 'Frank Underwood' AND b.name = 'Claire Underwood'
+CREATE (a)-[r:marries_to]->(b);
+
+// 2
+MATCH (a:character), (b:character)
+WHERE a.name = 'Frank Underwood' AND b.name = 'Zoe Barnes'
+CREATE (a)-[r:kills]->(b);
+
+// 3
+MATCH (a:character), (b:character)
+WHERE a.name = 'Frank Underwood' AND b.name = 'Edward Meechum'
+CREATE (a)-[r:sex_with { frequency: 'once' }]->(b);
+
+// 4
+MATCH (a:character), (b:character)
+WHERE a.name = 'Claire Underwood' AND b.name = 'Frank Underwood'
+CREATE (a)-[r:marries_to]->(b);
+
+// 5
+MATCH (a:character), (b:character)
+WHERE a.name = 'Claire Underwood' AND b.name = 'Adam Galloway'
+CREATE (a)-[r:sex_with { frequency: 'multiple' }]->(b);
+
+// 6
+MATCH (a:character), (b:character)
+WHERE a.name = 'Claire Underwood' AND b.name = 'Edward Meechum'
+CREATE (a)-[r:sex_with { frequency: 'once' }]->(b);
+
+// 7
+MATCH (a:character), (b:character)
+WHERE a.name = 'Edward Meechum' AND b.name = 'Frank Underwood'
+CREATE (a)-[r:protects]->(b);
+
+// 8
+MATCH (a:character), (b:character)
+WHERE a.name = 'Edward Meechum' AND b.name = 'Claire Underwood'
+CREATE (a)-[r:protects]->(b);
+
+// 9
+MATCH (a:character), (b:character)
+WHERE a.name = 'Adam Galloway' AND b.name = 'Claire Underwood'
+CREATE (a)-[r:leaks_info { info: 'photos' }]->(b);
+
+// 10
+MATCH (a:character), (b:character)
+WHERE a.name = 'Zoe Barnes' AND b.name = 'Frank Underwood'
+CREATE (a)-[r:sex_with { frequency: 'multiple' }]->(b);
+
+// 11
+MATCH (a:character), (b:character)
+WHERE a.name = 'Remy Danton' AND b.name = 'Frank Underwood'
+CREATE (a)-[r:works_for]->(b);
+
+// 12
+MATCH (a:character), (b:character)
+WHERE a.name = 'Remy Danton' AND b.name = 'Raymond Tusk'
+CREATE (a)-[r:works_for]->(b);
+
+// 13
+MATCH (a:character), (b:character)
+WHERE a.name = 'Remy Danton' AND b.name = 'Jackie Sharp'
+CREATE (a)-[r:loves]->(b);
+
+// 14
+MATCH (a:character), (b:character)
+WHERE a.name = 'Remy Danton' AND b.name = 'Adam Galloway'
+CREATE (a)-[r:persuaded { action: 'leak photos' }]->(b);
+
+// 15
+MATCH (a:character), (b:character)
+WHERE a.name = 'Jackie Sharp' AND b.name = 'Remy Danton'
+CREATE (a)-[r:loves]->(b);
+
+// 16
+MATCH (a:character), (b:character)
+WHERE a.name = 'Jackie Sharp' AND b.name = 'Frank Underwood'
+CREATE (a)-[r:works_for]->(b);
+
+// 17
+MATCH (a:character), (b:character)
+WHERE a.name = 'Frank Underwood' AND b.name = 'Raymond Tusk'
+CREATE (a)-[r:ruins]->(b);
+
+// queries
+MATCH (a:character {name:'Frank Underwood'})-[r:sex_with]-(b:character)
+RETURN r, b.name;
+
+MATCH (a:character)-[r:works_for]->(b:character {name:'Frank Underwood'})
+RETURN r, a.name;
