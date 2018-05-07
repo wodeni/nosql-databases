@@ -2,14 +2,33 @@
 # Wode "Nimo" Ni
 
 # Put the use case you chose here. Then justify your database choice:
-# MongoDB
-#
+# We have chosen MongoDB as the database of choice for the following reasons:
+# - MongoDB has a rich and flexible data model
+# - MongoDB has a idoimatic, native Python driver that works well with many
+#   Python objects such as Time and regex
+# - MongoDB has aggregation framework, allowing us to query and transform
+#   data in one place (in-place analysis of data)
+# - MongoDB has replica set
+
 # Explain what will happen if coffee is spilled on one of the servers in your cluster, causing it to go down.
-#
-#
+#   In the case of server failure (specifically coffee spill), one of the
+# servers in our MongoDB replica set will go down. Fortunately, all other
+# servers are still functional. "Automatic Failover" will take place if the
+# server that we spilled coffee on is a primary server, where the secondary
+# servers vote to select a new primary server and thereby recover from the
+# failure.
+
 # What data is it not ok to lose in your app? What can you do in your commands to mitigate the risk of lost data?
-#
-#
+#     Generally speaking, in our model, users, posts, comments and the
+# relationships among them are more important than other models such as vote.
+# As a general guideline, trying to condense certain actions into a singular
+# mongoDB command is the best way. To protect them against failed transactions, # we can try to make all updates transactional by at least two ways:
+# (1) If we are using MongoDB 4.0, there is native support for transactions.
+#     `client.start_session()` can be called to create a session, which gets
+#     passed down to every single command executed.
+# (2) If atomicity is vital and the mongoDB, external algorithms such as
+#     Two-phase commit protocol can be implmentated to ensure ACID.
+
 
 from pymongo import MongoClient
 from datetime import datetime
