@@ -43,7 +43,7 @@ users     = hn.users
 posts     = hn.posts
 comments  = hn.comments
 jobs      = hn.jobs
-DEBUG     = True
+DEBUG     = False
 
 def clear(db):
     db.command("dropDatabase")
@@ -160,13 +160,13 @@ def add_user(name, email, pwd):
     return id
 
 # add users
-if DEBUG: print '\n------------------- Inserting users\n'
+print '\n------------------- Inserting users\n'
 nimo = add_user('nimo', 'wn2155@columbia.edu', 'pass')
 john = add_user('john', 'john@columbia.edu', 'pass1')
 bill = add_user('bill', 'bill@columbia.edu', 'pass2')
 
 # add 5 posts
-if DEBUG: print '\n------------------- Inserting posts\n'
+print '\n------------------- Inserting posts\n'
 add_post(nimo, 'This NoSQL class at Columbia is interesting...',
     url = 'https://github.com/estolfo/nosql-databases')
 goto   = add_post(nimo, 'Goto statements considered harmful',
@@ -179,7 +179,7 @@ dog    = add_post(john, 'dog video',
     url = 'https://www.youtube.com/watch?v=VrwBnj9myuc')
 
 # add 5 comments
-if DEBUG: print '\n------------------- Inserting comments\n'
+print '\n------------------- Inserting comments\n'
 add_comment(nimo, goto,   'This is visionary!')
 add_comment(bill, goto,   'I still use goto all the time : (')
 add_comment(john, goto,   'Same here', replying=bill)
@@ -187,7 +187,7 @@ add_comment(nimo, victor, 'This is Victor\'s blog, right? Looks good')
 add_comment(bill, victor, 'yeah, mine is better', replying=nimo)
 
 # add votes
-if DEBUG: print '\n------------------- Upvoting posts\n'
+print '\n------------------- Upvoting posts\n'
 add_vote(nimo, victor)
 add_vote(nimo, goto)
 add_vote(bill, victor)
@@ -196,27 +196,37 @@ add_vote(john, victor)
 add_vote(john, dog)
 
 # add 2 jobs
-if DEBUG: print '\n------------------- Adding 2 jobs\n'
+print '\n------------------- Adding 2 jobs\n'
 add_job('Lowest paid software engineer at Columbia University', closed=True)
-add_job("A random start-up that sells you to somewhere else")
+add_job("A random start-up that sells you to somewhere else. WE DONT WANT PHP PROGRAMMERS")
 
 # add 2 asks
-if DEBUG: print '\n------------------- Adding a question\n'
+print '\n------------------- Adding a question\n'
 add_ask(bill, "How to set up your github pages?", text="I am so confused")
 succeed = add_ask(bill, "How to succeed in college?", text="I am so ambitious.")
 add_comment(nimo, succeed, "Don't drink too much.");
 
 # add 2 shows
-if DEBUG: print '\n------------------- Adding 2 shows\n'
+print '\n------------------- Adding 2 shows\n'
 add_show(nimo, "A C++ library for vector graphics animation!",
     url = 'https://github.com/wodeni/Animate-plus-plus')
 add_show(bill, "A deep learning model that authenticates Chinese jades!",
     url = 'https://github.com/xuanyuanzhang/EagleEyes/tree/master/images')
 
+# User story:
+#   Bill is passionate about PHP and wrote about it on Hackernews. He waits for
+# comments from the community while browsing through HN as usual. John dislikes
+# PHP and loves JavaScript, so he argued with Bill. Bill argued back but got
+# angry. He then checked if he'll find a job somewhere that does PHP but found
+# one miserable job that refuses to have PHP programmer. He then checked the
+# ASK section, hoping to find some question about the employment future for
+# PHP programmers, but found nothing. He is really sad and left HN.
+
 # Action 1: A user publishes an article
 print '\n ----- Action 1: A user publishes an article\n'
 php    = add_post(bill, 'PHP is the best language',
     text = 'I agree with that statement :P')
+print "Bill publishes an article: " + posts.find_one({ '_id': php })['title']
 
 # Action 2: A user sees titles of the 10 highest-voted articles
 print '\n ----- Action 2: A user sees titles of the 10 highest-voted articles\n'
@@ -230,40 +240,66 @@ cursor = posts.aggregate([
     { '$sort': {"vote_count": -1} }
 ])
 i = 0
-for document in cursor:
-    if i == 10: break
-    pprint(document['title'])
-    i += 1
+if DEBUG:
+    for document in cursor:
+        if i == 10: break
+        pprint(document)
+        i += 1
+else:
+    for document in cursor:
+        if i == 10: break
+        print "Post #", str(i + 1), document['title'], "( upvotes: ", document['vote_count'], ')'
+        i += 1
 
 # Action 3: A user comments on an article
 print '\n ----- Action 3: A user comments on an article\n'
-add_comment(john, php, 'I just cannot agree with you. That language sucks!')
+cmt = add_comment(john, php, 'I just cannot agree with you. That language sucks!')
+print 'John comments : \"' + comments.find_one({ '_id': cmt })['content'] + '\"', 'on article \"' +  posts.find_one({ '_id': php })['title'] + '\"'
 
 # Action 4: A user up-votes an article
 print '\n ----- Action 4: A user up-votes an article\n'
 add_vote(nimo, php)
+print "Nimo votes for the article: " + posts.find_one({ '_id': php })['title']
 
 # Action 5: A user replies another comment
 print '\n ----- Action 5: A user replies another comment\n'
-add_comment(bill, php, 'You do not understand PHP. Shame on you', replying=john)
+cmt = add_comment(bill, php, 'You do not understand PHP. Shame on you', replying=john)
+print 'Bill replies to John that: \"' + comments.find_one({ '_id': cmt })['content'] + '\"', 'on article \"' +  posts.find_one({ '_id': php })['title'] + '\"'
 
 # Action 6: A user sees all jobs that are open
 print '\n ----- Action 6: A user sees all jobs that are open\n'
 cursor = jobs.find({ 'closed': False })
-for document in cursor:
-    pprint(document)
+if DEBUG:
+    for document in cursor:
+        pprint(document)
+else:
+    for document in cursor:
+        print "[JOB]", document['title']
 
 # Action 7: A user checks all the shows
 print '\n ----- Action 7: A user check all the shows\n'
 regx = re.compile(r"^Show HN:")
 cursor = posts.find({"title": regx})
-for document in cursor:
-    pprint(document)
+if DEBUG:
+    for document in cursor:
+        pprint(document)
+else:
+    for document in cursor:
+        print "[SHOW]", document['title']
 
 # Action 8: A user check sall the answered asks
 print '\n ----- Action 8: A user check all the answered asks\n'
 regx = re.compile("^Ask HN:")
 
 cursor = posts.find({"title": regx,  'comments': { '$ne': [] } })
-for document in cursor:
-    pprint(document)
+if DEBUG:
+    for document in cursor:
+        pprint(document)
+else:
+    print "Here are all questions _with_ answers"
+    for document in cursor:
+        print "[ASK]", document['title']
+        for c in document['comments']:
+            cmt = comments.find_one({ '_id': c })
+            usr = users.find_one({ '_id': cmt['user'] })
+            print '\tAnswer by', usr['name'] + ": ", cmt['content']
